@@ -4,7 +4,7 @@
 This repository contains the tool designed for segmenting the olfactory bulb on high-resolutional (0.8mm Isotropic) T2-Weighted MRI
 
 
-Our work is under review; source code will be made available upon acceptance.
+**Note** : Our paper is under review; source code will be made available upon acceptance.
 
 For more information about the pipeline check our [OHBM 2021 poster](./OHBM_poster_v2.pdf)
 
