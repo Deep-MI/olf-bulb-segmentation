@@ -1,0 +1,16 @@
+docker run --gpus all -it --rm --name ob -v /localmount/volume-hd/users/estradae/Datasets/Olfatory_Bulb/OB_Combine/:/data/ -v //localmount/volume-hd/users/estradae/Projects/OB_Project/segmentation_auto_crop/:/output/ -v /home/estradae/Documents/Scripts/:/scripts  -u $(id -u) pytorch14:v2
+
+#reliability
+docker run --gpus all -it --rm --name ob -v /groups/mri-rhinelandstudy/olf_test/t2v3_and_t2_caipi:/data/ -v /localmount/volume-hd/users/estradae/Projects/OB_Project/reliability/t2_2_t2caipi/:/output/ -v /localmount/volume-hd/users/estradae/Projects/OB_Project/segmentation_auto_crop/:/weights/ -v /home/estradae/Documents/Scripts/:/scripts  -u $(id -u) pytorch14:v2
+
+
+#code
+python multiple_subjects.py
+
+
+
+
+# T2 stability
+docker run --gpus all -it --rm --name ob -v //localmount/volume-hd/users/estradae/Datasets/RS_T2_Dataset/:/data/ -v //localmount/volume-hd/users/estradae/Projects/OB_Project/:/output/ -v /home/estradae/Documents/Scripts/:/scripts  -u $(id -u) pytorch14:v2
+
+python3 multiple_subjects.py -sub_list /data/t2_subjects.csv -out_dir /output/stability_test/rs_testset -data_dir /data/  -batch 8 -loc_dir /output/t2_intensity_aug/LocModels -loc_arc FastSurferCNN -seg_dir  /output/t2_intensity_aug/SegModels -seg_arc AttFastSurferCNN -rs -logits
