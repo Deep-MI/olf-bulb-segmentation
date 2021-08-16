@@ -5,7 +5,7 @@ import sys
 sys.path.append('../')
 sys.path.append('/../../')
 import numpy as np
-from ob_pipeline.utils import image_utils
+from utils import image_utils
 import nibabel as nib
 
 def uncertainty_measures(data, label,pred_img,ras_cm):
@@ -220,9 +220,6 @@ def calculate_stats(args,save_dir,image,prediction,logits,cm,cm_logits,logger):
 
 
 def calculate_stats_no_loc(args,save_dir):
-
-
-
     import os
     import pandas as pd
     from skimage.measure import regionprops
@@ -249,8 +246,7 @@ def calculate_stats_no_loc(args,save_dir):
 
 
 def obstats2tableRS(args,save_dir):
-
-    from ob_pipeline.utils import misc
+    from utils import misc
     import os
     import  pandas as pd
     loc_columns=['loc_cm','seg_cm','dist_mm','mse_px','ROI_NVoxels','in_image','Flags']
@@ -304,7 +300,7 @@ def obstats2tableRS(args,save_dir):
 
 
 def obstats2table(main_dir,sub_list,name='obstats_table.csv'):
-    from ob_pipeline.utils import misc
+    from utils import misc
     import os
     import  pandas as pd
     loc_columns=['loc_cm','seg_cm','dist_mm','mse_px','ROI_NVoxels','in_image','Flags']

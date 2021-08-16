@@ -111,7 +111,7 @@ if __name__=='__main__':
     sub_list=check_paths(args.sublist,args.data_dir)
 
     for i in range(sub_list.shape[0]):
-        cmd='python3 ./run_pipeline_v2.py -in_img {} -out_dir {} -sid {} -batch {} -gpu_id {} ' \
+        cmd='python3 ./run_pipeline.py -in_img {} -out_dir {} -sid {} -batch {} -gpu_id {} ' \
             '-loc_dir {} -loc_arc {} -seg_dir {} -seg_arc {} -model {}'.format(sub_list[i,1],args.output_dir,
                                                                     sub_list[i,0],args.batch_size,
                                                                     args.gpu_id,args.loc_dir,

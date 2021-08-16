@@ -78,7 +78,7 @@ def plot_coronal_predictions(images_batch=None,pred_batch=None,img_per_row=4):
 def plot_qc_images(save_dir,image,prediction,padd=30):
     from scipy import ndimage
     from nilearn import plotting
-    from ob_pipeline.utils import image_utils
+    from utils import image_utils
 
     qc_dir=os.path.join(save_dir,'QC')
 

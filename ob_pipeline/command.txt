@@ -14,3 +14,27 @@ python multiple_subjects.py
 docker run --gpus all -it --rm --name ob -v //localmount/volume-hd/users/estradae/Datasets/RS_T2_Dataset/:/data/ -v //localmount/volume-hd/users/estradae/Projects/OB_Project/:/output/ -v /home/estradae/Documents/Scripts/:/scripts  -u $(id -u) pytorch14:v2
 
 python3 multiple_subjects.py -sub_list /data/t2_subjects.csv -out_dir /output/stability_test/rs_testset -data_dir /data/  -batch 8 -loc_dir /output/t2_intensity_aug/LocModels -loc_arc FastSurferCNN -seg_dir  /output/t2_intensity_aug/SegModels -seg_arc AttFastSurferCNN -rs -logits
+
+
+
+
+#test
+docker run --gpus all -it --rm --name ob -v /home/estradae/Downloads/OB_SEGMENTATION_TEST/:/data/ -v /localmount/volume-hd/users/estradae/Projects/OB_Project/:/output/ -v //home/estradae/Documents/Repository/olf_bulb_segmentation/ob_pipeline/:/scripts  -u $(id -u) pytorch14:v2
+
+python3 run_pipeline.py -in_img /data/sub-003db57e_ses-1_T2w.nii.gz -sid sub_003db57 -out_dir /data/  -batch 8 -loc_dir /output/t2_intensity_aug/LocModels -loc_arc FastSurferCNN -seg_dir  /output/t2_intensity_aug/SegModels -seg_arc AttFastSurferCNN -rs -logits
+
+python3 run_pipeline.py -in_img /data/sub-018ad760_ses-1_T2w.nii.gz -sid sub_018ad760 -out_dir /data/  -batch 8 -loc_dir /output/t2_intensity_aug/LocModels -loc_arc FastSurferCNN -seg_dir  /output/t2_intensity_aug/SegModels -seg_arc AttFastSurferCNN -rs -logits
+
+
+#No_interpolation_test
+python3 run_pipeline.py -in_img /data/sub-003db57e_ses-1_T2w.nii.gz -sid sub_003db57_no_inter -out_dir /data/  -batch 8 -loc_dir /output/t2_intensity_aug/LocModels -loc_arc FastSurferCNN -seg_dir  /output/t2_intensity_aug/SegModels -seg_arc AttFastSurferCNN  -no_inter -hires
+
+
+
+
+docker run --gpus all -it --rm --name ob -v /home/estradae/Desktop/sample/:/data/ -v /localmount/volume-hd/users/estradae/Projects/OB_Project/:/output/ -v //home/estradae/Documents/Repository/olf_bulb_segmentation/ob_pipeline/:/scripts  -u $(id -u) pytorch14:v2
+
+python3 run_pipeline.py -in_img /data/T2_sample.nii.gz -sid t2_sample -out_dir /data/  -batch 8 -loc_dir /output/t2_intensity_aug/LocModels -loc_arc FastSurferCNN -seg_dir  /output/t2_intensity_aug/SegModels -seg_arc AttFastSurferCNN
+
+python3 run_pipeline.py -in_img /data/T2.nii.gz -sid t2 -out_dir /data/  -batch 8 -loc_dir /output/t2_intensity_aug/LocModels -loc_arc FastSurferCNN -seg_dir  /output/t2_intensity_aug/SegModels -seg_arc AttFastSurferCNN
+

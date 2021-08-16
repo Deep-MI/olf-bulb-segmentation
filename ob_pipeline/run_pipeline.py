@@ -5,8 +5,7 @@ import numpy as np
 import os
 import time
 import argparse
-from ob_pipeline.utils import misc as misc
-import shutil
+from utils import misc as misc
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -18,7 +17,6 @@ def read_config(path):
     return configStruct
 
 def get_full_paths(weights_dict,root_dir):
-
     new_dict={}
     for key,value in weights_dict.items():
         path = misc.locate_file(value,root_dir)
@@ -32,12 +30,11 @@ def get_full_paths(weights_dict,root_dir):
 
 
 def ob_pipeline(args,flags):
-
     import nibabel as nib
-    from ob_pipeline.utils import conform as conform
-    from ob_pipeline.models.OBNet import OBNet
-    from ob_pipeline.utils import stats
-    from ob_pipeline.utils import visualization
+    from utils import conform as conform
+    from models.OBNet import OBNet
+    from utils import stats
+    from utils import visualization
 
     save_dir=os.path.join(args.output_dir,args.sub_id)
     misc.create_exp_directory(save_dir)
@@ -50,8 +47,8 @@ def ob_pipeline(args,flags):
         logger.info('Reading file {}'.format(args.in_img))
         #load t2 image
         t2_orig_img=nib.load(args.in_img)
+        #Conform Image intensities to 0 to 255
         t2_img=conform.conform(t2_orig_img,flags,logger)
-
 
         #Prediction
         pipeline= OBNet(args,flags,logger)
@@ -60,9 +57,8 @@ def ob_pipeline(args,flags):
 
         misc.create_exp_directory(os.path.join(save_dir, 'stats'))
 
+        #Compute Segmentation Stats
         if coords:
-            #calculate stats
-
             misc.create_exp_directory(os.path.join(save_dir,'QC'))
 
             visualization.plot_qc_images(save_dir=save_dir,image=t2_crop,prediction=pred_img)
@@ -73,11 +69,13 @@ def ob_pipeline(args,flags):
             end = time.time() - start
 
             logger.info("Total computation time :  %0.4f seconds." % end)
+            logger.info('\n')
+            logger.info('Thank you for using the automated olfactory bulb segmentation pipeline')
+            logger.info('If you find it useful and use it for a publication, please cite: ')
+            logger.info('Estrada, Santiago, et al. "Automated Olfactory Bulb Segmentation on High Resolutional T2-Weighted MRI."\n'
+                        'NeuroImage (2021): 118464. https://doi.org/10.1016/j.neuroimage.2021.118464')
         else:
             stats.calculate_stats_no_loc(args, save_dir)
-
-        if args.rs:
-            stats.obstats2tableRS(args, save_dir)
 
     else:
         logger.info('ERROR: file {} not found'.format(args.in_img))
@@ -97,19 +95,24 @@ def option_parse():
                         default='subid')
 
     parser.add_argument('-batch', "--batch_size", type=int,
-                        help='Batch size for inference by default is 16', required=False, default=16)
+                        help='Batch size for inference by default is 8', required=False, default=8)
 
     parser.add_argument('-gpu_id', "--gpu_id", type=int,
                         help='GPU device name to run model', required=False, default=0)
     parser.add_argument('-no_cuda', "--no_cuda", action='store_true',
                         help='Disable CUDA (no GPU usage, inference on CPU)', required=False)
+    parser.add_argument('-no_inter', "--no_inter", action='store_true',
+                        help='No interpolate input scans to the default training resolution of 0.8mm isotropic', required=False)
+
+
+    parser.add_argument('-order', "--order", type=int,
+                        help='interpolation order (0=nearest,1=linear(default),2=quadratic,3=cubic) ', required=False, default=1)
+
     parser.add_argument('-logits', "--save_logits", action='store_true',
                         help='Save logits', required=False)
 
     parser.add_argument('-model', "--model", type=int,
                         help='model number', required=False, default=5)
-
-    parser.add_argument('-rs','--rs',action='store_true',help='compute RS statistics',required=False)
 
     parser.add_argument('-hires', '--hires', action='store_true', help='Upsample crop region', required=False)
 

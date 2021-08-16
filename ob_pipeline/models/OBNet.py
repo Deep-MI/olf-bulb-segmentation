@@ -25,10 +25,10 @@ import numpy as np
 import time
 from torchvision import transforms
 from torch.utils.data.dataloader import DataLoader
-from ob_pipeline.utils.datasetUtils import testDataset
-from ob_pipeline.utils.transformUtils import ToTensorTest
-from ob_pipeline.utils.image_utils import plane_swap, map_size , get_thick_slices, clean_seg
-from ob_pipeline.utils import misc as misc
+from utils.datasetUtils import testDataset
+from utils.transformUtils import ToTensorTest
+from utils.image_utils import plane_swap, map_size , get_thick_slices, clean_seg
+from utils import misc as misc
 from scipy.special import softmax
 import os
 
@@ -36,25 +36,13 @@ import os
 
 
 def select_model(arc,modelConfig):
-    from ob_pipeline.models.FastSurferCNN import FastSurferCNN
-    from ob_pipeline.models.DenseUnet import DenseUnet
-    from ob_pipeline.models.UNet import UNet
-    from ob_pipeline.models.AttFastSurferCNN import AttFastSurferCNN
-    from ob_pipeline.models.FastSurferCNN3D import FastSurferCNN3D
-    from ob_pipeline.models.Unet3D import UNet3D
+    from models.FastSurferCNN import FastSurferCNN
+    from models.AttFastSurferCNN import AttFastSurferCNN
 
     if arc == 'FastSurferCNN':
      return FastSurferCNN(modelConfig.copy())
-    elif arc == 'DenseUnet':
-        return DenseUnet(modelConfig.copy())
-    elif arc == 'UNet':
-        return UNet(modelConfig.copy())
     elif arc == 'AttFastSurferCNN':
         return AttFastSurferCNN(modelConfig.copy())
-    elif arc == 'FastSurferCNN3D':
-        return FastSurferCNN3D(modelConfig.copy())
-    elif arc == 'UNet3D':
-        return UNet3D(modelConfig.copy())
     else:
         raise ValueError("Model {} not found".format(arc))
 
@@ -247,17 +235,9 @@ class OBNet(object):
 
         planes = ['axial','coronal','sagittal']
 
-        #padding =  self.flags['segmentation']['imgSize'][0] // 2
-
-        #new_t2_arr = t2_arr[orig_coord[0] - padding:orig_coord[0] + padding,
-        #             orig_coord[1] - padding:orig_coord[1] + padding,
-        #             orig_coord[2] - padding:orig_coord[2] + padding]
-
-
-
         orig_shape = t2_arr.shape
 
-        sub_logits = np.ndarray((orig_shape[0], orig_shape[1], orig_shape[2],num_classes,0), dtype=np.uint8)
+        sub_logits = np.ndarray((orig_shape[0], orig_shape[1], orig_shape[2],num_classes,0), dtype=np.float32)
 
         start_seg=time.time()
 
@@ -314,19 +294,22 @@ class OBNet(object):
         import nibabel as nib
         import nibabel.processing
         import h5py
-        import numpy
+
+
         mri_folder=os.path.join(save_dir,'mri')
         misc.create_exp_directory(mri_folder)
 
         i_zoom = t2_img.header.get_zooms()
-        #to-do what to do with higher resolutions
-        #TO-DO interpolation flag
-        if not np.allclose(np.array(i_zoom), np.array(self.flags['spacing']), rtol=0.05):
-        #if not np.allclose(np.array(i_zoom), np.array(self.flags['spacing']), rtol=0.2):
-            self.logger.info('Interpolating image from resolution {} to {}'.format(i_zoom,self.flags['spacing']))
-            t2_img = nibabel.processing.resample_to_output(t2_img, self.flags['spacing'],order=1)
+        if self.args.no_inter:
+            self.logger.info('T2 image will be process at native image resolution({}).\n'
+                             'Warning: The pipeline was validated in T2 scans with an input resolution of 0.7 and 0.8 mm isotropic.\n'
+                             'T2 scans with another resolution is highly recommended that segmentation quality is assessed by the user or re-run the pipeline using the default mode.'.format(i_zoom))
+        else:
+            if not np.allclose(np.array(i_zoom), np.array(self.flags['spacing']), rtol=0.05):
+                self.logger.info('Interpolating image from resolution {} to {}'.format(i_zoom,self.flags['spacing']))
+                t2_img = nibabel.processing.resample_to_output(t2_img, self.flags['spacing'],order=self.args.order)
 
-        #save image a 0.8 isotropic
+        #Save pipeline input Image
         t2_img.set_data_dtype(np.uint8)
         nib.save(t2_img,os.path.join(mri_folder,'orig.nii.gz'))
 
@@ -391,18 +374,18 @@ class OBNet(object):
 
             prediction, logits = self.run_segmentation(crop_t2_arr)
 
-            pred_img = nib.MGHImage(prediction, crop_t2.affine, crop_t2.header)
+            pred_img = nib.Nifti1Image(prediction, crop_t2.affine, crop_t2.header)
             pred_img=clean_seg(pred_img,orig_coord['ras'])
 
             if self.args.hires:
                 self.logger.info('Interpolating prediction from resolution {} to {}'.format(t2_img.header.get_zooms(), i_zoom))
                 pred_img = nibabel.processing.resample_to_output(pred_img, i_zoom, order=0)
-                crop_t2 = nibabel.processing.resample_to_output(crop_t2, i_zoom, order=1)
+                crop_t2 = nibabel.processing.resample_to_output(crop_t2, i_zoom, order=self.args.order)
                 crop_t2.set_data_dtype(np.uint8)
                 nib.save(crop_t2, os.path.join(mri_folder, 'orig_crop.nii.gz'))
 
             pred_img.set_data_dtype(np.int16)
-            nib.save(pred_img,os.path.join(mri_folder,'ob_seg.mgz'))
+            nib.save(pred_img,os.path.join(mri_folder,'ob_seg.nii.gz'))
 
             if self.args.save_logits:
                 logit_file=os.path.join(mri_folder,'ob_seg_logits.h5')
@@ -443,65 +426,3 @@ class OBNet(object):
 
         return pred_logits
 
-    # def run_segmentation_3D(self,t2_arr,orig_coord):
-    #
-    #     network_params=self.seg_params_network.copy()
-    #     network_params.update({'num_channels':1})
-    #     model = select_model(self.flags['seg_arc'],network_params)
-    #
-    #     num_classes=self.seg_params_network['num_classes']
-    #
-    #     if self.model_parallel:
-    #         model = nn.DataParallel(model)
-    #
-    #     model.to(self.device)
-    #
-    #     plane = 'sagittal'
-    #
-    #     padding =  self.flags['segmentation']['imgSize'][0] // 2
-    #
-    #     new_t2_arr = t2_arr[orig_coord[0] - padding:orig_coord[0] + padding,
-    #                  orig_coord[1] - padding:orig_coord[1] + padding,
-    #                  orig_coord[2] - padding:orig_coord[2] + padding]
-    #
-    #
-    #     orig_shape = new_t2_arr.shape
-    #
-    #     sub_logits = np.ndarray((orig_shape[0], orig_shape[1], orig_shape[2],num_classes,0), dtype=np.uint8)
-    #
-    #     for key,seg_model in self.flags['segmentation']['models'].items():
-    #         #load model
-    #         model_state = self.load_weights(seg_model)
-    #         model.load_state_dict(model_state)
-    #         print('Model weights loaded from {}'.format(seg_model))
-    #
-    #         # organize data
-    #         mod_arr = plane_swap(new_t2_arr, plane=plane)
-    #         mod_arr = map_size(mod_arr, base_shape=(mod_arr.shape[0], self.flags['segmentation']['imgSize'][0],
-    #                                                 self.flags['segmentation']['imgSize'][1]),verbose=0)
-    #         start = time.time()
-    #         # evaluate
-    #         logits = self.predict3D(mod_arr ,model=model)
-    #
-    #         # organice data
-    #         logits = plane_swap(logits, plane, inverse=True)
-    #         # remove padding
-    #         temp_logits = np.zeros((orig_shape[0], orig_shape[1], orig_shape[2], logits.shape[3]))
-    #         for i in range(logits.shape[3]):
-    #             temp_logits[:, :, :, i] = map_size(logits[:, :, :, i],
-    #                                                base_shape=(orig_shape[0], orig_shape[1], orig_shape[2]),
-    #                                                verbose=0)
-    #
-    #         logits = softmax(temp_logits, axis=-1)
-    #
-    #         logits = logits[..., np.newaxis]
-    #
-    #         sub_logits=np.append(sub_logits,logits,axis=-1)
-    #
-    #         end = time.time() - start
-    #         print("Tested Done in {:0.4f} seconds".format(end))
-    #
-    #     sub_arr = np.sum(sub_logits, axis=-1)
-    #     pred_arr = np.argmax(sub_arr, axis=-1)
-    #
-    #     return pred_arr,sub_logits
