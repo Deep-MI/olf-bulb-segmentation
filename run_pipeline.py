@@ -119,28 +119,25 @@ def option_parse():
     parser.add_argument('-ninter', "--no_interpolate", action='store_true',
                         help='No interpolate input scans to the default training resolution of 0.8mm isotropic', required=False)
     parser.add_argument('-order', "--order", type=int,
-                        help='interpolation order to used if input scan is interpolated (0=nearest,1=linear(default),2=quadratic,3=cubic) ', required=False, default=1)
+                        help='interpolation order to used if input scan is interpolated (0=nearest,1=linear(default),2=quadratic,3=cubic)', required=False, default=1)
 
     parser.add_argument('-logits', "--save_logits", action='store_true',
                         help='Save segmentation logits maps as a h5 file', required=False)
 
     parser.add_argument('-model', "--model", type=int,
                         help='AttFastSurferCNN model to be run by default the pipeline runs all 4 AttFastSurferCNN models;\n'
-                             '(1 = model 1,2 = model 2,3 = model 3, 4 = model 4, 5= all models(default) )', required=False, default=5)
+                             '(1 = model 1,2 = model 2,3 = model 3, 4 = model 4, 5= all models(default))', required=False, default=5)
 
     parser.add_argument('-ores', '--orig_res', action='store_true', help='Upsample or downsample OB segmentation to the input image resolution;\n'
                                                                      ' by default the pipeline produces a segmentation with a 0.8mm isotropic resolution', required=False)
 
     parser.add_argument('-loc_dir','--loc_dir',help='Localization weights directory',required=False,default='./LocModels')
-    parser.add_argument('-loc_arc','--loc_arc',help='Localization architecture',required=False,default='FastSurferCNN')
 
     parser.add_argument('-seg_dir','--seg_dir',help='Segmentation weights directory',required=False,default='./SegModels')
-    parser.add_argument('-seg_arc','--seg_arc',help='Segmentation architecture',required=False,default='AttFastSurferCNN')
-
 
     args = parser.parse_args()
 
-    FLAGS=set_up_model(seg_dir=args.seg_dir,seg_arc=args.seg_arc,loc_dir=args.loc_dir,loc_arc=args.loc_arc,model=args.model)
+    FLAGS=set_up_model(seg_dir=args.seg_dir,seg_arc='AttFastSurferCNN',loc_dir=args.loc_dir,loc_arc='FastSurferCNN',model=args.model)
 
     FLAGS.update({'batch_size':args.batch_size})
     FLAGS.update({'loc_arc':args.loc_arc})
