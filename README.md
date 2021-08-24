@@ -1,6 +1,6 @@
 # Overview
 
-This repository contains the tool designed for segmenting the olfactory bulb on high-resolutional (0.7 or 0.8mm Isotropic) whole brain T2-Weighted MRI.
+This repository contains the tool designed for segmenting the olfactory bulb on high-resolutional (0.7 or 0.8mm Isotropic) whole brain T2-Weighted MRI. Paper [pdf](https://www.sciencedirect.com/science/article/pii/S1053811921007370)
 
 ![](/images/pipeline.png)
 
@@ -19,8 +19,7 @@ If the tool is run for the first time run the following steps:
  1. Open Terminal
  2. Change the current working directory to the location where you want the cloned directory 
  3. Type `git-clone https://github.com/Deep-MI/olf-bulb-segmentation.git`  or download .zip file from the github repository 
- 4. Download the model weights from the following [link](https://nextcloud.dzne.de/index.php/s/QaYpocJn9HFN7jp) into the same location were the repository was cloned.
- 5. Installed the python libraries mention on the requirements file (see [requirements.txt](./requirements.txt))  
+ 4. Installed the python libraries mention on the requirements file (see [requirements.txt](./requirements.txt))  
 
 **The tool also has a docker version**. Docker images are really easy to run and to make. They eliminate the challenges of setting up your code to work in different environments. Your Docker image should run the same no matter where it is running.
   For more information check the [README.md](./docker/README.md) in the docker directory.
@@ -52,7 +51,7 @@ The main script is called run_pipeline.py within which certain options can be se
 
 
 
-**Example**
+**Example** Note for the commands to work on the terminal you need to change the current working directory to the location where you cloned directory 
 ```
 # Run paper implementation 
 python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid subject
@@ -65,20 +64,22 @@ python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid 
 
 # Run paper implementation on cpu
 python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid subject -ncuda
-
 ```
 
 **Sample Case**
-The [link](https://nextcloud.dzne.de/index.php/s/QaYpocJn9HFN7jp) with model weights additionally includes a sample t2 image for testing the pipeline. To test the pipeline run: 
+To test the pipeline we provided a sample scan ([link](https://nextcloud.dzne.de/index.php/s/QaYpocJn9HFN7jp)). Download then scan and from the cloned directory run: 
 ```
 python3 run_pipeline.py -in path/to/sample/T2_sample.nii.gz -out /directory/to/save/output -sid sample
 ```
+
+## Output
+
 
 ## Reference
 
 If you use this tool please cite:
 
-Estrada, Santiago, et al. "Automated olfactory bulb segmentation on high resolutional T2-weighted MRI." NeuroImage (2021). [https://doi.org/10.1016/j.neuroimage.2021.118464](https://www.sciencedirect.com/science/article/pii/S1053811921007370)
+Estrada, Santiago, et al. "Automated olfactory bulb segmentation on high resolutional T2-weighted MRI." NeuroImage (2021). https://doi.org/10.1016/j.neuroimage.2021.118464
 ```
 @article{estrada2021automated,
   title={Automated Olfactory Bulb Segmentation on High Resolutional T2-Weighted MRI},
