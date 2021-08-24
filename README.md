@@ -1,5 +1,4 @@
-# Automated Olfactory Bulb Segmentation on High Resolutional T2-Weighted MRI
-
+# Overview
 
 This repository contains the tool designed for segmenting the olfactory bulb on high-resolutional (0.7 or 0.8mm Isotropic) whole brain T2-Weighted MRI.
 
@@ -24,7 +23,7 @@ If the tool is run for the first time run the following steps:
  5. Installed the python libraries mention on the requirements file (see [requirements.txt](./requirements.txt))  
 
 **The tool also has a docker version**. Docker images are really easy to run and to make. They eliminate the challenges of setting up your code to work in different environments. Your Docker image should run the same no matter where it is running.
-  For more information check the [README.md](./docker/README.md) in the docker directory
+  For more information check the [README.md](./docker/README.md) in the docker directory.
 
 ## Running the tool
 
@@ -35,16 +34,16 @@ The main script is called run_pipeline.py within which certain options can be se
 #### Required Arguments
  * `--in_img,-in`: T2 image path 
  * `--output_dir,-out`: Main output directory where pipeline results are going to be stored
- * `--sub_id,-sid`: subject_id; All generated outputs are stored under the subject_id folder as follows (/output_dir/sub_id) 
+ * `--sub_id,-sid`: subject_id; All generated outputs are stored under the subject_id folder as follows: */output_dir/sub_id* 
 
 #### Optional Arguments Pipeline setup
  * `--no_interpolate, -ninter`: Flag to disable the interpolation of the input scans to the default training resolution of 0.8mm isotropic
  * `--order, -order`: Interpolation order to used if input scan is interpolated (0=nearest,1=linear(default),2=quadratic,3=cubic)
  * `--save_logits, -logits`: Flag to save segmentation logits maps as h5 file
- * `--model, -model`: AttFastSurferCNN model to be run by default the pipeline runs all 4 AttFastSurferCNN models (1 = model 1, 2 = model 2, 3 = model 3, 4 = model 4, 5= all models (default))
+ * `--model, -model`: *AttFastSurferCNN* model to be run by default the pipeline runs all 4 *AttFastSurferCNN* models (1 = model 1, 2 = model 2, 3 = model 3, 4 = model 4, 5= all models (default))
  * `--orig_res, -ores`: Flag to upsample or downsample the OB segmentation to the native input image resolution by default the pipeline produces a segmentation with a 0.8mm isotropic resolution.
- * `--loc_dir, -loc_dir`: Localization weights directory (default = ./LocModels , the pipeline expects the model weights to be in the same directory as the source code)
- * `--seg_dir, -seg_dir`: Segmentation weights directory  (default = ./SegModels , the pipeline expects the model weights to be in the same directory as the source code)
+ * `--loc_dir, -loc_dir`: Localization weights directory (default = *./LocModels* , the pipeline expects the model weights to be in the same directory as the source code)
+ * `--seg_dir, -seg_dir`: Segmentation weights directory  (default = *./SegModels* , the pipeline expects the model weights to be in the same directory as the source code)
  
 #### Optional Arguments System Setup
  * `--batch_size,-batch`: Batch size for inference (default = 8, the batch size depends of the size of the GPU or CPU. Lower this parameter to reduce memory requirements ) 
