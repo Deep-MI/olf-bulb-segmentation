@@ -39,7 +39,7 @@ The main script is called run_pipeline.py within which certain options can be se
 #### Optional Arguments Pipeline setup
  * `--no_interpolate, -ninter`: Flag to disable the interpolation of the input scans to the default training resolution of 0.8mm isotropic
  * `--order, -order`: Interpolation order to used if input scan is interpolated (0=nearest,1=linear(default),2=quadratic,3=cubic)
- * `--save_logits, -logits`: Flag to save segmentation logits maps as h5 file
+ * `--save_logits, -logits`: Flag to additionally save segmentation logits maps as h5 file
  * `--model, -model`: *AttFastSurferCNN* model to be run by default the pipeline runs all 4 *AttFastSurferCNN* models (1 = model 1, 2 = model 2, 3 = model 3, 4 = model 4, 5= all models (default))
  * `--orig_res, -ores`: Flag to upsample or downsample the OB segmentation to the native input image resolution by default the pipeline produces a segmentation with a 0.8mm isotropic resolution.
  * `--loc_dir, -loc_dir`: Localization weights directory (default = *./LocModels* , the pipeline expects the model weights to be in the same directory as the source code)
@@ -55,22 +55,24 @@ The main script is called run_pipeline.py within which certain options can be se
 **Example**
 ```
 # Run paper implementation 
-nvidia-docker run --rm --name fatsegnet -u $(id -u) -v ../my_dataset/:/tool/Data -v ../my_dataset_output/:/tool/Output  adipose_tool:v1 -loc
+python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid subject
 
-# Change Participants files 
-nvidia-docker run [Options]  adipose_tool:v1 -f new_participants.csv -loc
+# Run the pipeline natively at a different resolution to the default one (0.8 Isotropic)
+python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid subject -ninter
+    
+# Run the pipeline at the default resolution (0.8 Isotropic) but mapped segmentation to the native input image resolution
+python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid subject -ores
 
-# Change name of water and fat images to search
-nvidia-docker run [Options]  adipose_tool:v1  -fat fat_image.nii.gz -water water_image.nii.gz -loc
-
-# Select a specific GPU (ex: device ID 2)
-nvidia-docker run [Options]  adipose_tool:v1  -loc -gpu_id 2
-
-# run only the segmentation models on the axial plane and define interpolation order
-nvidia-docker run [Options]  adipose_tool:v1  -axial -order 3
+# Run paper implementation on cpu
+python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid subject -ncuda
 
 ```
 
+**Sample Case**
+The [link](https://nextcloud.dzne.de/index.php/s/QaYpocJn9HFN7jp) with model weights additionally includes a sample t2 image for testing the pipeline. To test the pipeline run: 
+```
+python3 run_pipeline.py -in path/to/sample/T2_sample.nii.gz -out /directory/to/save/output -sid sample
+```
 
 ## Reference
 
