@@ -3,16 +3,9 @@
 
 This repository contains the tool designed for segmenting the olfactory bulb on high-resolutional (0.7 or 0.8mm Isotropic) whole brain T2-Weighted MRI.
 
-<img src="/images/pipeline.png" class="responsive" alt="Olfactory Bulb Pipeline" style="
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
-  width: 100%;
-    max-width: 600px;
-    height: auto;
-">
+<img src="/images/pipeline.png" width="100%">
 
-![](/images/pipeline.png){:class="img-responsive"}
+![](/images/pipeline.png)
 
 * First publicly available deep learning pipeline to segment the olfactory bulbs (OBs) in sub-millimeter T2-weighted whole-brain MRI.
 
