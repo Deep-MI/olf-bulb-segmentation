@@ -3,7 +3,7 @@
 
 This repository contains the tool designed for segmenting the olfactory bulb on high-resolutional (0.7 or 0.8mm Isotropic) whole brain T2-Weighted MRI.
 
-<img src="https://images/pipeline.png" width="100">
+<img src="/images/pipeline.png" width="100">
 
 ![](/images/pipeline.png){:class="img-responsive"}
 
