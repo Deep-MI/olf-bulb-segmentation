@@ -38,7 +38,7 @@ The main script is called run_pipeline.py within which certain options can be se
 #### Optional Arguments Pipeline setup
  * `--no_interpolate, -ninter`: Flag to disable the interpolation of the input scans to the default training resolution of 0.8mm isotropic
  * `--order, -order`: Interpolation order to used if input scan is interpolated (0=nearest,1=linear(default),2=quadratic,3=cubic)
- * `--save_logits, -logits`: Flag to additionally save segmentation logits maps as h5 file
+ * `--save_logits, -logits`: Flag to additionally save segmentation prediction logits maps as h5 file
  * `--model, -model`: *AttFastSurferCNN* model to be run by default the pipeline runs all 4 *AttFastSurferCNN* models (1 = model 1, 2 = model 2, 3 = model 3, 4 = model 4, 5= all models (default))
  * `--orig_res, -ores`: Flag to upsample or downsample the OB segmentation to the native input image resolution by default the pipeline produces a segmentation with a 0.8mm isotropic resolution.
  * `--loc_dir, -loc_dir`: Localization weights directory (default = *./LocModels* , the pipeline expects the model weights to be in the same directory as the source code)
@@ -73,8 +73,39 @@ python3 run_pipeline.py -in path/to/sample/T2_sample.nii.gz -out /directory/to/s
 ```
 
 ## Output
+The pipeline generates three type of output as presented in the following scheme:
 
+```  bash
+#Output Scheme 
+|-- output_dir                                   
+    |-- sub_id
+        |-- mri (interpolated scans and segmentation maps)
+           |-- orig.nii.gz (Input image to the pipeline after interpolation and intensities conform)
+           |-- orig_crop.nii.gz (Only created if --orig_res flag is used, T2 from the region of interest at the native image resolution)
+           |-- ob_seg.nii.gz (OB prediction map)
+           |-- loc_orig.nii.gz (Input image to the localization network)
+           |-- loc_heatmap.nii.gz (Localization prediction map)
+           |-- ob_seg_logits.h5 (Only created if --save_logits flag is used, segmentation prediction logits maps)          
+        |-- QC (Quality control images, this images are created only for a fast assessment of the segmention, 
+                for a detailed QC is still recommended to open the segmentation map)
+           |-- coronal_screenshot.png 
+           |-- overall_screenshot.png
+        |-- stats                                                 
+           |-- segmentation_stats.csv (Volume predictions and warning flags)
+           |-- localization_stats.csv (Localization stats used for croping the region of interest and warning flags)         
+ ``` 
+ 
+**Image Biomarkers**
 
+For more information on the pipeline image biomarkers reported in the csv files please check the document [variables.pdf](/to/do)
+
+** Quality Control Image Example**
+By default the tool creates 2 images for visually control of the input scan and predicted segmentation, one as the one shown below. (blue: Left OB, red : Right OB).
+The other one shows a sagital,coronal and axial view of the prediction map around the centroid of mass.
+ 
+![](/images/qc_example.png)
+
+ 
 ## Reference
 
 If you use this tool please cite:
@@ -96,3 +127,8 @@ Estrada, Santiago, et al. "Automated olfactory bulb segmentation on high resolut
 For any questions and feedback, feel free to contact santiago.estrada(at).dzne.de<br/>
 
 --------
+
+
+sudo add-apt-repository ppa:inkscape.dev/stable-1.1
+sudo apt-get update
+sudo apt install inkscape

@@ -7,6 +7,7 @@ scipy==1.4.1
 pyparsing==2.4.7
 python-dateutil==2.8.1
 scikit-image==0.17.2
+matplotlib==3.4.3
 
 # Pytorch the pipeline was tested on pytorch 15 and CUDA 11.2, to use a different CUDA version check pytorch documentation
 pytorch==1.5.1
