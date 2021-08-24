@@ -256,62 +256,6 @@ def calculate_stats_no_loc(args,save_dir):
     loc_df.to_csv(os.path.join(stats_dir, 'localization_stats.csv'), sep=',', index=False)
 
 
-
-
-def obstats2tableRS(args,save_dir):
-    from utils import misc
-    import os
-    import  pandas as pd
-    loc_columns=['loc_cm','seg_cm','dist_mm','mse_px','ROI_NVoxels','in_image','Flags']
-
-    metrics=['NVoxels','Volume_mm3','normMean','normMin','normMax','Entropy','CV','CM']
-
-    structNames=['Left_OB','Right_OB','Total_OB']
-
-    columns=[]
-
-    for struc in structNames:
-        for metric in metrics:
-            columns.append(struc+ '_'+metric)
-
-    columns.extend(loc_columns)
-
-
-
-    table=np.zeros((1,len(columns)),dtype=object)
-    table[:]=np.nan
-
-
-    seg_stats_file=misc.locate_file('*segmentation_stats.csv',os.path.join(save_dir,'stats'))
-
-    if seg_stats_file:
-        df=pd.read_csv(seg_stats_file[0])
-        idj =0
-        for struc in structNames:
-            stats=df.loc[df.StructName == struc]
-            for metric in metrics:
-                table[0,idj]=stats[metric].values[0]
-                idj +=1
-    else:
-        idj = len(structNames)* len(metrics)
-
-    loc_stats_file = misc.locate_file('*localization_stats.csv', os.path.join(save_dir, 'stats'))
-    df_loc=pd.read_csv(loc_stats_file[0])
-    loc_values=df_loc.values
-    table[0,idj:] = loc_values[0,1:]
-
-
-    final_table=table[:,:]
-
-    df_table=pd.DataFrame(final_table,columns=columns)
-
-
-    df_table.insert(loc=0, column='sub_id', value=[args.sub_id])
-
-    stats_dir = os.path.join(save_dir, 'stats')
-    df_table.to_json(os.path.join(stats_dir, 'rs_ob_stats.json'), orient='records')
-
-
 def obstats2table(main_dir,sub_list,name='obstats_table.csv'):
     from utils import misc
     import os

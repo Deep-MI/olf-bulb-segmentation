@@ -13,11 +13,8 @@
 #    limitations under the License.
 
 import sys
-
 sys.path.append('../')
 sys.path.append('../../')
-
-
 import torch
 import torch.nn as nn
 import numpy as np
@@ -217,13 +214,7 @@ class OBNet(object):
 
     def run_segmentation(self,t2_arr):
 
-        if self.flags['3D']:
-            network_params = self.seg_params_network.copy()
-            network_params.update({'num_channels': 1})
-            model = select_model(self.flags['seg_arc'], network_params)
-        else:
-            model = select_model(self.flags['seg_arc'],self.seg_params_network.copy())
-
+        model = select_model(self.flags['seg_arc'],self.seg_params_network.copy())
 
         num_classes=self.seg_params_network['num_classes']
 
@@ -254,12 +245,9 @@ class OBNet(object):
                                                     self.flags['segmentation']['imgSize'][1]),verbose=0)
 
             start_model = time.time()
-            # evaluate
-            if self.flags['3D']:
-                logits = self.predict3D(mod_arr, model=model)
-            else:
-                mod_arr = get_thick_slices(mod_arr, self.flags['thickness'])
-                logits = self.predict(mod_arr, batch_size=self.flags['batch_size'], model=model)
+
+            mod_arr = get_thick_slices(mod_arr, self.flags['thickness'])
+            logits = self.predict(mod_arr, batch_size=self.flags['batch_size'], model=model)
 
             # organice data
             logits = plane_swap(logits, plane, inverse=True)
@@ -299,7 +287,7 @@ class OBNet(object):
         misc.create_exp_directory(mri_folder)
 
         i_zoom = t2_img.header.get_zooms()
-        if self.args.no_inter:
+        if self.args.no_interpolate:
             self.logger.info('T2 image will be process at native image resolution({}).\n'
                              'Warning: The pipeline was validated in T2 scans with an input resolution of 0.7 and 0.8 mm isotropic.\n'
                              'T2 scans with another resolution is highly recommended that segmentation quality is assessed by the user or re-run the pipeline using the default mode.'.format(i_zoom))
@@ -376,12 +364,16 @@ class OBNet(object):
             pred_img = nib.Nifti1Image(prediction, crop_t2.affine, crop_t2.header)
             pred_img=clean_seg(pred_img,orig_coord['ras'])
 
-            if self.args.hires:
-                self.logger.info('Interpolating prediction from resolution {} to {}'.format(t2_img.header.get_zooms(), i_zoom))
-                pred_img = nibabel.processing.resample_to_output(pred_img, i_zoom, order=0)
-                crop_t2 = nibabel.processing.resample_to_output(crop_t2, i_zoom, order=self.args.order)
-                crop_t2.set_data_dtype(np.uint8)
-                nib.save(crop_t2, os.path.join(mri_folder, 'orig_crop.nii.gz'))
+            if self.args.orig_res:
+                if not self.args.no_interpolate:
+                    self.logger.info('Interpolating prediction from resolution {} to {}'.format(t2_img.header.get_zooms(), i_zoom))
+                    pred_img = nibabel.processing.resample_to_output(pred_img, i_zoom, order=0)
+                    crop_t2 = nibabel.processing.resample_to_output(crop_t2, i_zoom, order=self.args.order)
+                    crop_t2.set_data_dtype(np.uint8)
+                    nib.save(crop_t2, os.path.join(mri_folder, 'orig_crop.nii.gz'))
+                else:
+                    self.logger.info('Segmentation map is already @ input image native resolution {}'.format(i_zoom))
+                    self.logger.info('No interpolation need it as no_interpolate flag is {}'.format(self.args.no_interpolate))
 
             pred_img.set_data_dtype(np.int16)
             nib.save(pred_img,os.path.join(mri_folder,'ob_seg.nii.gz'))
@@ -394,34 +386,3 @@ class OBNet(object):
             return pred_img,crop_t2, logits ,orig_coord,cm_logits
         else:
             return None,None,None,None,None
-
-    def predict3D(self,img,model):
-
-        img = img.astype(np.float32)
-
-        # Normalize and clamp between 0 and 1
-        img = np.clip(img / 255.0, a_min=0.0, a_max=1.0)
-
-        img = np.expand_dims(img,axis=0)
-        img = np.expand_dims(img,axis=0)
-
-
-
-        model.eval()
-        with torch.no_grad():
-            images_batch =torch.from_numpy(img)
-
-            if self.use_cuda:
-                images_batch = images_batch.cuda()
-
-            temp = model(images_batch)
-            pred_logits=temp.cpu()[:]
-
-
-        pred_logits = torch.squeeze(pred_logits, axis=0)
-        # change from N,C,W,H to view with C in last dimension = N,W,H,C
-        pred_logits = pred_logits.permute(1, 2, 3, 0)
-        pred_logits = pred_logits.numpy()
-
-        return pred_logits
-

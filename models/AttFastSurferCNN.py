@@ -1,5 +1,4 @@
 
-
 # Copyright 2021 Image Analysis Lab, German Center for Neurodegenerative Diseases (DZNE), Bonn
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +15,6 @@
 
 import torch
 import torch.nn as nn
-from torch.utils import checkpoint
 
 class AttFastSurferCNN(nn.Module):
     """

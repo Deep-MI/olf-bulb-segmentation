@@ -99,12 +99,12 @@ def ob_pipeline(args,flags):
 
 def option_parse():
     parser = argparse.ArgumentParser(
-        description='',
+        description='Olfactory bulb segmentation pipeline for high resolutional T2-weighted MRI',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument("-in_img", "--in_img", help="T2 image path", required=True)
+    parser.add_argument("-in", "--in_img", help="T2 image path", required=True)
 
-    parser.add_argument("-out_dir", "--output_dir", help="Main output directory where models results are going to be store", required=True)
+    parser.add_argument("-out", "--output_dir", help="Main output directory where pipeline results are going to be store", required=True)
 
     parser.add_argument("-sid", "--sub_id", type=str, help="subject id", required=True,
                         default='subid')
@@ -112,27 +112,27 @@ def option_parse():
     parser.add_argument('-batch', "--batch_size", type=int,
                         help='Batch size for inference by default is 8', required=False, default=8)
 
-    parser.add_argument('-gpu_id', "--gpu_id", type=int,
+    parser.add_argument('-gpu', "--gpu_id", type=int,
                         help='GPU device name to run model', required=False, default=0)
-    parser.add_argument('-no_cuda', "--no_cuda", action='store_true',
+    parser.add_argument('-ncuda', "--no_cuda", action='store_true',
                         help='Disable CUDA (no GPU usage, inference on CPU)', required=False)
-    parser.add_argument('-no_inter', "--no_inter", action='store_true',
+    parser.add_argument('-ninter', "--no_interpolate", action='store_true',
                         help='No interpolate input scans to the default training resolution of 0.8mm isotropic', required=False)
-
-
     parser.add_argument('-order', "--order", type=int,
-                        help='interpolation order (0=nearest,1=linear(default),2=quadratic,3=cubic) ', required=False, default=1)
+                        help='interpolation order to used if input scan is interpolated (0=nearest,1=linear(default),2=quadratic,3=cubic) ', required=False, default=1)
 
     parser.add_argument('-logits', "--save_logits", action='store_true',
-                        help='Save logits', required=False)
+                        help='Save segmentation logits maps as a h5 file', required=False)
 
     parser.add_argument('-model', "--model", type=int,
-                        help='model number', required=False, default=5)
+                        help='AttFastSurferCNN model to be run by default the pipeline runs all 4 AttFastSurferCNN models;\n'
+                             '(1 = model 1,2 = model 2,3 = model 3, 4 = model 4, 5= all models(default) )', required=False, default=5)
 
-    parser.add_argument('-hires', '--hires', action='store_true', help='Upsample crop region', required=False)
+    parser.add_argument('-ores', '--orig_res', action='store_true', help='Upsample or downsample OB segmentation to the input image resolution;\n'
+                                                                     ' by default the pipeline produces a segmentation with a 0.8mm isotropic resolution', required=False)
 
     parser.add_argument('-loc_dir','--loc_dir',help='Localization weights directory',required=False,default='./LocModels')
-    parser.add_argument('-loc_arc','--loc_arc',help='Localization architecture',required=False,default='UNet')
+    parser.add_argument('-loc_arc','--loc_arc',help='Localization architecture',required=False,default='FastSurferCNN')
 
     parser.add_argument('-seg_dir','--seg_dir',help='Segmentation weights directory',required=False,default='./SegModels')
     parser.add_argument('-seg_arc','--seg_arc',help='Segmentation architecture',required=False,default='AttFastSurferCNN')
@@ -212,9 +212,6 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id);
 
     ob_pipeline(args,FLAGS)
-
-    # if os.path.isdir("./tmp"):
-    #     shutil.rmtree("./tmp")
 
     sys.exit(0)
 
