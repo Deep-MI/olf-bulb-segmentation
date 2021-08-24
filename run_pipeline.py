@@ -140,8 +140,8 @@ def option_parse():
     FLAGS=set_up_model(seg_dir=args.seg_dir,seg_arc='AttFastSurferCNN',loc_dir=args.loc_dir,loc_arc='FastSurferCNN',model=args.model)
 
     FLAGS.update({'batch_size':args.batch_size})
-    FLAGS.update({'loc_arc':args.loc_arc})
-    FLAGS.update({'seg_arc':args.seg_arc})
+    FLAGS.update({'loc_arc': 'FastSurferCNN' })
+    FLAGS.update({'seg_arc': 'AttFastSurferCNN'})
 
     return args,FLAGS
 
@@ -192,11 +192,6 @@ def set_up_model(seg_dir,seg_arc,loc_dir,loc_arc,model):
     loc_weights = get_full_paths(loc_weights, loc_dir)
 
     FLAGS['localization']['models'].update(loc_weights)
-
-    if '3D' in seg_arc:
-        FLAGS.update({'3D': True})
-    else:
-        FLAGS.update({'3D': False})
 
     return FLAGS
 
