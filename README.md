@@ -1,6 +1,6 @@
 # Overview
 
-This repository contains the tool designed for segmenting the olfactory bulb on high-resolutional (0.7 or 0.8mm Isotropic) whole brain T2-Weighted MRI. Paper [pdf](https://www.sciencedirect.com/science/article/pii/S1053811921007370)
+This repository contains the tool designed for segmenting the olfactory bulb on high-resolutional (0.7 or 0.8mm Isotropic) whole brain T2-Weighted MRI. [Paper](https://www.sciencedirect.com/science/article/pii/S1053811921007370)
 
 ![](/images/pipeline.png)
 
@@ -51,7 +51,7 @@ The main script is called run_pipeline.py within which certain options can be se
 
 
 
-**Example** Note for the commands to work on the terminal you need to change the current working directory to the location where you cloned directory 
+**Example** Note for the commands to work on the terminal, you need to change the current working directory to the location where you cloned the repository.
 ```
 # Run paper implementation 
 python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid subject
@@ -67,7 +67,7 @@ python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid 
 ```
 
 **Sample Case**
-To test the pipeline we provided a sample scan ([link](https://nextcloud.dzne.de/index.php/s/QaYpocJn9HFN7jp)). Download then scan and from the cloned directory run: 
+To test the pipeline, we provided a sample scan ([link](https://nextcloud.dzne.de/index.php/s/QaYpocJn9HFN7jp)). Download then scan and from the cloned directory run: 
 ```
 python3 run_pipeline.py -in path/to/sample/T2_sample.nii.gz -out /directory/to/save/output -sid sample
 ```
@@ -86,8 +86,7 @@ The pipeline generates three type of output as presented in the following scheme
            |-- loc_orig.nii.gz (Input image to the localization network)
            |-- loc_heatmap.nii.gz (Localization prediction map)
            |-- ob_seg_logits.h5 (Only created if --save_logits flag is used, segmentation prediction logits maps)          
-        |-- QC (Quality control images, this images are created only for a fast assessment of the segmention, 
-                for a detailed QC is still recommended to open the segmentation map)
+        |-- QC (Quality control images these images are created only for a fast assessment of the segmentation for a detailed QC is still recommended to open the segmentation map)
            |-- coronal_screenshot.png 
            |-- overall_screenshot.png
         |-- stats                                                 
@@ -97,11 +96,12 @@ The pipeline generates three type of output as presented in the following scheme
  
 **Image Biomarkers**
 
-For more information on the pipeline image biomarkers reported in the csv files please check the document [variables.pdf](/to/do)
+For more information on the pipeline image biomarkers reported in the CSV files please check the document [variables.pdf](/to/do)
 
-** Quality Control Image Example**
-By default the tool creates 2 images for visually control of the input scan and predicted segmentation, one as the one shown below. (blue: Left OB, red : Right OB).
-The other one shows a sagital,coronal and axial view of the prediction map around the centroid of mass.
+**Quality Control Image Example**
+
+By default, the tool creates two images for visually controlling the input scan and predicted segmentation, one shown below. (blue: Left OB, red : Right OB).
+The other one shows a sagittal, coronal and axial view of the prediction map around the centroid of mass.
  
 ![](/images/qc_example.png)
 
