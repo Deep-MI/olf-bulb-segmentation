@@ -3,7 +3,7 @@
 
 This repository contains the tool designed for segmenting the olfactory bulb on high-resolutional (0.7 or 0.8mm Isotropic) whole brain T2-Weighted MRI.
 
-![](/images/pipeline.png)
+![](/images/pipeline.png){:class="img-responsive"}
 
 * First publicly available deep learning pipeline to segment the olfactory bulbs (OBs) in sub-millimeter T2-weighted whole-brain MRI.
 
@@ -40,7 +40,8 @@ and set via the command line:
 
 
 
-#### Reference
+
+## Reference
 
 If you use this tool please cite:
 
