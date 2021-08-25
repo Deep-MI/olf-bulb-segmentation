@@ -72,6 +72,12 @@ To evaluate the pipeline, we provide a colab notebook for quick and easy use; no
 <br/>
 You required a google account to interact with the notebook. For more information on how to use colab in neuroimaging see our group [tutorials](https://github.com/Deep-MI/FastSurfer/tree/master/Tutorial).
 
+
+**Multiple Scans segmentation**
+
+For running the pipeline in multiple scans see [ms_doc.MD](./ms_doc.MD) file 
+
+
 ## Output
 The pipeline generates three type of output as presented in the following scheme:
 
