@@ -66,11 +66,11 @@ python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid 
 python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid subject -ncuda
 ```
 
-**Sample Case**
-To test the pipeline, we provided a sample scan ([link](https://nextcloud.dzne.de/index.php/s/QaYpocJn9HFN7jp)). Download then scan and from the cloned directory run: 
-```
-python3 run_pipeline.py -in path/to/sample/T2_sample.nii.gz -out /directory/to/save/output -sid sample
-```
+**Quick and easy - OB segmentation**
+
+To evaluate the pipeline, we provide a colab notebook for quick and easy use; no programming experience required. Just click the google colab icon to access the notebook <a href="https://colab.research.google.com/github/Deep-MI/olf-bulb-segmentation/blob/main/OB_pipeline_test.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> 
+<br/>
+You required a google account to interact with the notebook. For more information on how to use colab in neuroimaging see our group [tutorials](https://github.com/Deep-MI/FastSurfer/tree/master/Tutorial).
 
 ## Output
 The pipeline generates three type of output as presented in the following scheme:
