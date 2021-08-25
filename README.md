@@ -127,8 +127,3 @@ Estrada, Santiago, et al. "Automated olfactory bulb segmentation on high resolut
 For any questions and feedback, feel free to contact santiago.estrada(at).dzne.de<br/>
 
 --------
-
-
-sudo add-apt-repository ppa:inkscape.dev/stable-1.1
-sudo apt-get update
-sudo apt install inkscape
