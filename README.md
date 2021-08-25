@@ -30,12 +30,12 @@ The repository contains all the source code and modules needed to run the script
 The main script is called run_pipeline.py within which certain options can be selected and set via the command line:
 
 
-#### Required Arguments
+#### Required arguments
  * `--in_img,-in`: T2 image path 
  * `--output_dir,-out`: Main output directory where pipeline results are going to be stored
  * `--sub_id,-sid`: subject_id; All generated outputs are stored under the subject_id folder as follows: */output_dir/sub_id* 
 
-#### Optional Arguments Pipeline setup
+#### Optional arguments - pipeline setup
  * `--no_interpolate, -ninter`: Flag to disable the interpolation of the input scans to the default training resolution of 0.8mm isotropic
  * `--order, -order`: Interpolation order to used if input scan is interpolated (0=nearest,1=linear(default),2=quadratic,3=cubic)
  * `--save_logits, -logits`: Flag to additionally save segmentation prediction logits maps as h5 file
@@ -44,7 +44,7 @@ The main script is called run_pipeline.py within which certain options can be se
  * `--loc_dir, -loc_dir`: Localization weights directory (default = *./LocModels* , the pipeline expects the model weights to be in the same directory as the source code)
  * `--seg_dir, -seg_dir`: Segmentation weights directory  (default = *./SegModels* , the pipeline expects the model weights to be in the same directory as the source code)
  
-#### Optional Arguments System Setup
+#### Optional arguments - system setup
  * `--batch_size,-batch`: Batch size for inference (default = 8, the batch size depends of the size of the GPU or CPU. Lower this parameter to reduce memory requirements ) 
  * `--no_cuda, -ncuda`: Flag to disable CUDA usage (no GPU usage, inference on CPU)
  * `--gpu_id, -gpu` : GPU device name to run model (default = 0) 
@@ -75,7 +75,7 @@ You required a google account to interact with the notebook. For more informatio
 
 **Multiple Scans segmentation**
 
-For running the pipeline in multiple scans see [ms_doc.MD](./ms_doc.MD) file 
+For running the pipeline in multiple scans see [MSDOC.md](./MSDOC.md) file 
 
 
 ## Output
