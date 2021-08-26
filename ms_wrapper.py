@@ -20,7 +20,7 @@ import argparse
 sys.path.append('../')
 sys.path.append('../../')
 
-from ob_pipeline.utils import stats
+from utils import stats
 
 
 def run_cmd(cmd):
