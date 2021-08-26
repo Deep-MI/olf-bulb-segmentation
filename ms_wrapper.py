@@ -50,9 +50,6 @@ def option_parse():
 
     parser.add_argument("-out", "--output_dir", help="Main output directory where pipeline results are going to be store", required=True)
 
-    parser.add_argument("-sid", "--sub_id", type=str, help="subject id", required=True,
-                        default='subid')
-
     parser.add_argument('-batch', "--batch_size", type=int,
                         help='Batch size for inference by default is 8', required=False, default=8)
 
