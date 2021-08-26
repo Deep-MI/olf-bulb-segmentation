@@ -35,4 +35,6 @@ RUN git clone https://github.com/Deep-MI/olf-bulb-segmentation.git
 
 WORKDIR "/olf-bulb-segmentation"
 
+RUN git pull
+
 ENTRYPOINT ["bash"]

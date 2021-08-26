@@ -108,8 +108,10 @@ def check_paths(sublist,root_dir):
                 new_arr[idx,1]=t2_path[0]
                 idx += 1
             else:
+                print('--'*30)
                 print('ERROR: path {} is not a file '.format(t2_path[0]))
         else:
+            print('--' * 30)
             print('ERROR image {} not found at directory {}'.format(t2_prefix,os.path.join(root_dir,sub)))
 
 
