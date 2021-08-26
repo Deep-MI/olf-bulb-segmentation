@@ -86,7 +86,7 @@ def check_paths(sublist,root_dir):
     import pandas as pd
     import os
     import numpy as np
-    from ob_pipeline.utils import misc
+    from utils import misc
 
     df=pd.read_csv(sublist,sep=',')
 
