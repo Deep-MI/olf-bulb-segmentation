@@ -8,11 +8,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
          rm -rf /var/lib/apt/lists/*
 
 
-# Create a working directory
-RUN mkdir /app
-WORKDIR /app
-
-
 # Install miniconda and needed python packages (for FastSurferCNN)
 RUN wget -qO ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh  && \
      chmod +x ~/miniconda.sh && \
@@ -26,6 +21,7 @@ ENV PYTHONUNBUFFERED=0 \
     PATH=/opt/conda/bin:$PATH
 
 ENV MPLCONFIGDIR=/opt/matplotlib
+RUN chmod 777 /opt/matplotlib
 
 WORKDIR "/"
 # Remove old repository  folder if exists
