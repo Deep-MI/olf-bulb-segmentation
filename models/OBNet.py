@@ -116,6 +116,7 @@ class OBNet(object):
         model.eval()
         with torch.no_grad():
             for batch_idx, sample_batch in enumerate(test_loader):
+                print('---> Procesing batch {}  from {}'.format(batch_idx+1,len(test_loader)))
                 images_batch = sample_batch['image']
 
                 if self.use_cuda:
