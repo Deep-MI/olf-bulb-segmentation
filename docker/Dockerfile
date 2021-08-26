@@ -21,6 +21,7 @@ ENV PYTHONUNBUFFERED=0 \
     PATH=/opt/conda/bin:$PATH
 
 ENV MPLCONFIGDIR=/opt/matplotlib
+RUN mkdir /opt/matplotlib
 RUN chmod 777 /opt/matplotlib
 
 WORKDIR "/"
