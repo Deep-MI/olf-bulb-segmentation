@@ -28,6 +28,8 @@ ENV PYTHONUNBUFFERED=0 \
 ENV MPLCONFIGDIR=/opt/matplotlib
 
 WORKDIR "/"
+# Remove old repository  folder if exists
+RUN if [ -d "/olf-bulb-segmentation" ]; then rm -rf '/olf-bulb-segmentation'; fi
 
 RUN git clone https://github.com/Deep-MI/olf-bulb-segmentation.git
 
