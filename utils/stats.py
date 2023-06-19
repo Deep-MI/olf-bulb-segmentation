@@ -97,7 +97,7 @@ def extract_stats(prop,uncertain_values,SegID,Structname,col_names,voxel_size,ze
     metric_matrix[0, 9] = np.around(uncertain_values[0,1],decimals=4)
     #CM
     centroid= prop.centroid
-    centroid= np.array([centroid[0]+zero_xyz[0],centroid[1]+zero_xyz[1],centroid[2]+zero_xyz[2]]).astype(np.int)
+    centroid= np.array([centroid[0]+zero_xyz[0],centroid[1]+zero_xyz[1],centroid[2]+zero_xyz[2]]).astype(np.int16)
 
     metric_matrix[0, 10] = centroid
 
@@ -201,12 +201,12 @@ def calculate_stats(args,save_dir,image,prediction,logits,cm,cm_logits,logger):
     loc_matrix[:]=np.nan
 
     loc_matrix[0,0]=args.sub_id
-    loc_matrix[0,1]=np.array([cm['xyz'][0],cm['xyz'][1],cm['xyz'][2]],dtype=(np.int))
+    loc_matrix[0,1]=np.array([cm['xyz'][0],cm['xyz'][1],cm['xyz'][2]],dtype=(np.int16))
     if not no_labels:
         # calcualte cm of mass
         mass_center = center_of_mass(arr_total)
         mass_center = np.array([mass_center[0] + cm['zero_xyz'][0], mass_center[1] + cm['zero_xyz'][1],
-                                mass_center[2] + cm['zero_xyz'][2]]).astype(np.int)
+                                mass_center[2] + cm['zero_xyz'][2]]).astype(np.int16)
 
         loc_matrix[0,2]=mass_center
 
@@ -219,11 +219,14 @@ def calculate_stats(args,save_dir,image,prediction,logits,cm,cm_logits,logger):
         loc_matrix[0,4]=np.around(np.mean(np.square(diff)),decimals=4)
 
     #roi_voxels
-    loc = np.zeros_like(cm_logits)
-    loc[cm_logits>0]=1
-    loc_labels,count=np.unique(loc,return_counts=True)
-    if 1 in loc_labels:
-        loc_matrix[0,5]=count[1]
+    if np.any(cm_logits):
+        loc = np.zeros_like(cm_logits)
+        loc[cm_logits>0]=1
+        loc_labels,count=np.unique(loc,return_counts=True)
+        if 1 in loc_labels:
+            loc_matrix[0,5]=count[1]
+    else:
+        loc_matrix[0, 5] = np.nan
 
     loc_matrix[0,6]=args.in_img.split('/')[-1].split('.')[0]
     #to-do warning flag for litte heat map maybe (1000) as sigma was 10 ,10**3
