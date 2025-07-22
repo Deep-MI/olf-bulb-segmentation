@@ -39,7 +39,7 @@ def define_size(mov_dim,ref_dim):
         new_dim (list) : New array size
         borders (list) : border Index for mapping the old volume into the new one
     """
-    new_dim=np.zeros(len(mov_dim),dtype=np.int)
+    new_dim=np.zeros(len(mov_dim),dtype=int)
     borders=np.zeros((len(mov_dim),2),dtype=int)
 
     padd = [int(mov_dim[0] // 2), int(mov_dim[1] // 2), int(mov_dim[2] // 2)]
