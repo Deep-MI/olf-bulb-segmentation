@@ -1,0 +1,58 @@
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+ARG PYTHON_VERSION=3.10
+ARG FORGE_VERSION=24.11.2-1
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install base OS dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    git \
+    bzip2 \
+    ca-certificates \
+    libglib2.0-0 \
+    libxext6 \
+    libsm6 \
+    libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Miniforge
+RUN wget --no-check-certificate -qO ~/miniforge.sh \
+    https://github.com/conda-forge/miniforge/releases/download/${FORGE_VERSION}/Miniforge3-${FORGE_VERSION}-Linux-x86_64.sh && \
+    chmod +x ~/miniforge.sh && \
+    ~/miniforge.sh -b -p /opt/miniforge && \
+    rm ~/miniforge.sh
+
+ENV PATH=/opt/miniforge/bin:$PATH
+
+# Copy custom SSL certificate into the image
+COPY docker/sslCACertOnly.crt /opt/ssl/sslCACertOnly.crt
+COPY docker/env.yml /install/env.yml
+
+# Configure Conda
+RUN conda config --set ssl_verify /opt/ssl/sslCACertOnly.crt
+
+# Install Python and Conda packages
+RUN conda env create -f /install/env.yml && conda clean -ya
+
+# Set matplotlib config directory
+ENV MPLCONFIGDIR=/opt/matplotlib
+RUN mkdir -p /opt/matplotlib && chmod 777 /opt/matplotlib
+
+# Activate the environment
+SHELL ["bash", "-c"]
+ENV CONDA_DEFAULT_ENV=olf-bulb-env
+ENV PATH="/opt/miniforge/envs/olf-bulb-env/bin:$PATH"
+
+
+# Create a non-root user
+
+WORKDIR "/"
+
+# Clone the segmentation repository
+RUN git clone https://github.com/Deep-MI/olf-bulb-segmentation.git
+
+WORKDIR "/olf-bulb-segmentation"
+
+ENTRYPOINT ["bash"]
