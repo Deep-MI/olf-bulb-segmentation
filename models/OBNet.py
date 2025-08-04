@@ -89,7 +89,7 @@ class OBNet(object):
     def load_weights(self,current_model):
         from collections import OrderedDict
 
-        model_state = torch.load(current_model, map_location=self.device)
+        model_state = torch.load(current_model, map_location=self.device,weights_only=True)
 
         new_state_dict = OrderedDict()
 
@@ -360,8 +360,8 @@ class OBNet(object):
 
         else:
             self.logger.info(30 * '-')
-            self.logger.info('Warning: The pipeline is configured to skip the OB localization module. '
-                             'If the T2 scan is a full brain image, please enable the localization module. '
+            self.logger.info('Warning: The pipeline will run with the -nloc argument; therefore, the OB localization module will be skipped. \n'
+                             'If the T2 scan is a full brain image, please do not disable the localization module.\n'
                              'Otherwise, make sure that the 0B is near the center of the T2 scan.')
 
             crop_t2_arr = t2_img.get_fdata()
