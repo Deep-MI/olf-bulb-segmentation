@@ -359,6 +359,11 @@ class OBNet(object):
                 return None, None, None, None, None
 
         else:
+            self.logger.info(30 * '-')
+            self.logger.info('Warning: The pipeline is configured to skip the OB localization module. '
+                             'If the T2 scan is a full brain image, please enable the localization module. '
+                             'Otherwise, make sure that the 0B is near the center of the T2 scan.')
+
             crop_t2_arr = t2_img.get_fdata()
             #middle point from crop image
 
