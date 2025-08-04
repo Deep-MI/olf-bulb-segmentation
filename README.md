@@ -43,7 +43,9 @@ The main script is called run_pipeline.py within which certain options can be se
  * `--orig_res, -ores`: Flag to upsample or downsample the OB segmentation to the native input image resolution by default the pipeline produces a segmentation with a 0.8mm isotropic resolution.
  * `--loc_dir, -loc_dir`: Localization weights directory (default = *./LocModels* , the pipeline expects the model weights to be in the same directory as the source code)
  * `--seg_dir, -seg_dir`: Segmentation weights directory  (default = *./SegModels* , the pipeline expects the model weights to be in the same directory as the source code)
- 
+ * `--no_localization, -nloc` : Flag to disable the localization network, for the segmentation to work without the localization network the input image requires to have the OB located at the center of the image volume. Recommend size for OB center image [96,96,96]. 
+This arguments is recommend it when whole brain T2w image is not available.  
+
 #### Optional arguments - system setup
  * `--batch_size,-batch`: Batch size for inference (default = 8, the batch size depends of the size of the GPU or CPU. Lower this parameter to reduce memory requirements ) 
  * `--no_cuda, -ncuda`: Flag to disable CUDA usage (no GPU usage, inference on CPU)

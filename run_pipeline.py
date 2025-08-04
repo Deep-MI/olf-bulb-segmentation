@@ -112,6 +112,8 @@ def option_parse():
     parser.add_argument('-batch', "--batch_size", type=int,
                         help='Batch size for inference by default is 8', required=False, default=8)
 
+    parser.add_argument('-nloc', '--no_localization', action='store_true', help='No OB localization Warning T2 scan needs to be center around the 0B',required=False)
+
     parser.add_argument('-gpu', "--gpu_id", type=int,
                         help='GPU device name to run model', required=False, default=0)
     parser.add_argument('-ncuda', "--no_cuda", action='store_true',

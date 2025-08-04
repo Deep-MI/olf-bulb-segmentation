@@ -202,7 +202,7 @@ class OBNet(object):
         self.logger.info("---> Finish localization models in {:0.4f} seconds".format(loc_end))
 
         try:
-            pred_cm = np.array(center_of_mass(pred_arr), dtype=np.int)
+            pred_cm = np.array(center_of_mass(pred_arr), dtype=np.int16)
 
         except:
             self.logger.info('ERROR: localization network cannot detect the region of interest. Please check image quality')
@@ -283,7 +283,6 @@ class OBNet(object):
         import nibabel.processing
         import h5py
 
-
         mri_folder=os.path.join(save_dir,'mri')
         misc.create_exp_directory(mri_folder)
 
@@ -301,89 +300,103 @@ class OBNet(object):
         t2_img.set_data_dtype(np.uint8)
         nib.save(t2_img,os.path.join(mri_folder,'orig.nii.gz'))
 
-        t2_arr = t2_img.get_fdata()
-
-        self.logger.info(30 * '-')
-        self.logger.info('Running localization models')
-        t2_cm, cm_logits, resampled_img= self.run_localization(t2_img)
-
-        if np.any(t2_cm):
-            cm_logits[cm_logits<0.5]= 0
-
-            resampled_img.set_data_dtype(np.uint8)
-            nib.save(resampled_img,os.path.join(mri_folder,'loc_orig.nii.gz'))
-
-            loc_pred = nib.Nifti1Image(cm_logits, resampled_img.affine, resampled_img.header)
-            loc_pred.set_data_dtype(np.float32)
-            nib.save(loc_pred, os.path.join(mri_folder, 'loc_heatmap.nii.gz'))
-
-            #transform coordinates
-            coord = np.array((t2_cm[0], t2_cm[1], t2_cm[2], 1))
-
-            orig_coord={}
-
-            orig_coord['ras'] = np.dot(resampled_img.affine, coord)
-
-            orig_coord['xyz'] = np.dot(np.linalg.inv(t2_img.affine), orig_coord['ras'])
-            orig_coord['xyz'] = orig_coord['xyz'].astype(np.int)
-
+        if not self.args.no_localization:
+            t2_arr = t2_img.get_fdata()
             self.logger.info(30 * '-')
-            self.logger.info('Crop image from coordinate % d, %d , %d' %(orig_coord['xyz'][0],orig_coord['xyz'][1],orig_coord['xyz'][2]))
-            self.logger.info(30 * '-')
+            self.logger.info('Running localization models')
 
-            #----------Segmentation----------
-            self.logger.info(30 * '-')
-            self.logger.info('Running segmentation models')
+            t2_cm, cm_logits, resampled_img= self.run_localization(t2_img)
+
+            if np.any(t2_cm):
+                cm_logits[cm_logits<0.5]= 0
+
+                resampled_img.set_data_dtype(np.uint8)
+                nib.save(resampled_img,os.path.join(mri_folder,'loc_orig.nii.gz'))
+
+                loc_pred = nib.Nifti1Image(cm_logits, resampled_img.affine, resampled_img.header)
+                loc_pred.set_data_dtype(np.float32)
+                nib.save(loc_pred, os.path.join(mri_folder, 'loc_heatmap.nii.gz'))
+
+                #transform coordinates
+                coord = np.array((t2_cm[0], t2_cm[1], t2_cm[2], 1))
+
+                orig_coord={}
+
+                orig_coord['ras'] = np.dot(resampled_img.affine, coord)
+
+                orig_coord['xyz'] = np.dot(np.linalg.inv(t2_img.affine), orig_coord['ras'])
+                orig_coord['xyz'] = orig_coord['xyz'].astype(np.int16)
+
+                self.logger.info(30 * '-')
+                self.logger.info('Crop image from coordinate % d, %d , %d' %(orig_coord['xyz'][0],orig_coord['xyz'][1],orig_coord['xyz'][2]))
+                self.logger.info(30 * '-')
+
+                padding=self.flags['segmentation']['imgSize'][0] // 2
+                zero_coordinate = np.array([orig_coord['xyz'][0] - padding, orig_coord['xyz'][1] - padding,
+                                            orig_coord['xyz'][2] - padding, 1])
+
+                orig_coord['zero_xyz']=zero_coordinate
+
+                crop_t2_arr = t2_arr[orig_coord['xyz'][0] - padding:orig_coord['xyz'][0] + padding,
+                             orig_coord['xyz'][1] - padding:orig_coord['xyz'][1] + padding,
+                             orig_coord['xyz'][2] - padding:orig_coord['xyz'][2] + padding]
 
 
-            padding=self.flags['segmentation']['imgSize'][0] // 2
-            zero_coordinate = np.array([orig_coord['xyz'][0] - padding, orig_coord['xyz'][1] - padding,
-                                        orig_coord['xyz'][2] - padding, 1])
+                self.logger.info(30 * '-')
+                self.logger.info('zero coordinate')
+                self.logger.info(zero_coordinate)
+                translationRAS = np.dot(t2_img.affine, zero_coordinate)
 
-            orig_coord['zero_xyz']=zero_coordinate
+                vox2RAS = t2_img.affine[:]
 
-            crop_t2_arr = t2_arr[orig_coord['xyz'][0] - padding:orig_coord['xyz'][0] + padding,
-                         orig_coord['xyz'][1] - padding:orig_coord['xyz'][1] + padding,
-                         orig_coord['xyz'][2] - padding:orig_coord['xyz'][2] + padding]
+                vox2RAS[0, 3] = translationRAS[0]
+                vox2RAS[1, 3] = translationRAS[1]
+                vox2RAS[2, 3] = translationRAS[2]
 
+                crop_t2=nib.Nifti1Image(crop_t2_arr,vox2RAS, t2_img.header)
 
-            self.logger.info(30 * '-')
-            self.logger.info('zero coordinate')
-            self.logger.info(zero_coordinate)
-            translationRAS = np.dot(t2_img.affine, zero_coordinate)
+            else:
+                return None, None, None, None, None
 
-            vox2RAS = t2_img.affine[:]
-
-            vox2RAS[0, 3] = translationRAS[0]
-            vox2RAS[1, 3] = translationRAS[1]
-            vox2RAS[2, 3] = translationRAS[2]
-
-            crop_t2=nib.Nifti1Image(crop_t2_arr,vox2RAS, t2_img.header)
-
-            prediction, logits = self.run_segmentation(crop_t2_arr)
-
-            pred_img = nib.Nifti1Image(prediction, crop_t2.affine, crop_t2.header)
-            pred_img=clean_seg(pred_img,orig_coord['ras'])
-
-            if self.args.orig_res:
-                if not self.args.no_interpolate:
-                    self.logger.info('Interpolating prediction from resolution {} to {}'.format(t2_img.header.get_zooms(), i_zoom))
-                    pred_img = nibabel.processing.resample_to_output(pred_img, i_zoom, order=0)
-                    crop_t2 = nibabel.processing.resample_to_output(crop_t2, i_zoom, order=self.args.order)
-                    crop_t2.set_data_dtype(np.uint8)
-                    nib.save(crop_t2, os.path.join(mri_folder, 'orig_crop.nii.gz'))
-                else:
-                    self.logger.info('Segmentation map is already @ input image native resolution {}'.format(i_zoom))
-                    self.logger.info('No interpolation need it as no_interpolate flag is {}'.format(self.args.no_interpolate))
-
-            pred_img.set_data_dtype(np.int16)
-            nib.save(pred_img,os.path.join(mri_folder,'ob_seg.nii.gz'))
-
-            if self.args.save_logits:
-                logit_file=os.path.join(mri_folder,'ob_seg_logits.h5')
-                hf = h5py.File(logit_file, 'w')
-                hf.create_dataset('Data', data=logits.astype(np.float32), compression='gzip')
-                hf.close()
-            return pred_img,crop_t2, logits ,orig_coord,cm_logits
         else:
-            return None,None,None,None,None
+            crop_t2_arr = t2_img.get_fdata()
+            crop_t2_arr = map_size(crop_t2_arr,base_shape=(self.flags['segmentation']['imgSize'][0],self.flags['segmentation']['imgSize'][1],self.flags['segmentation']['imgSize'][0]))
+            crop_t2 =  nib.Nifti1Image(crop_t2_arr,t2_img.affine,t2_img.header)
+            coord = np.array((crop_t2_arr.shape[0] // 2, crop_t2_arr.shape[1] // 2, crop_t2_arr.shape[2] // 2, 1))
+            orig_coord = {}
+            orig_coord['ras'] = np.dot(crop_t2.affine, coord)
+            orig_coord['xyz'] = coord[:]
+            orig_coord['zero_xyz'] = np.array((0,0,0,1))
+            cm_logits = None
+
+
+        # ----------Segmentation----------
+        self.logger.info(30 * '-')
+        self.logger.info('Running segmentation models')
+
+        prediction, logits = self.run_segmentation(crop_t2_arr)
+
+        pred_img = nib.Nifti1Image(prediction, crop_t2.affine, crop_t2.header)
+        pred_img=clean_seg(pred_img,orig_coord['ras'])
+
+        if self.args.orig_res:
+            if not self.args.no_interpolate:
+                self.logger.info('Interpolating prediction from resolution {} to {}'.format(t2_img.header.get_zooms(), i_zoom))
+                pred_img = nibabel.processing.resample_to_output(pred_img, i_zoom, order=0)
+                crop_t2 = nibabel.processing.resample_to_output(crop_t2, i_zoom, order=self.args.order)
+                crop_t2.set_data_dtype(np.uint8)
+                nib.save(crop_t2, os.path.join(mri_folder, 'orig_crop.nii.gz'))
+            else:
+                self.logger.info('Segmentation map is already @ input image native resolution {}'.format(i_zoom))
+                self.logger.info('No interpolation need it as no_interpolate flag is {}'.format(self.args.no_interpolate))
+
+        pred_img.set_data_dtype(np.int16)
+        nib.save(pred_img,os.path.join(mri_folder,'ob_seg.nii.gz'))
+
+        if self.args.save_logits:
+            logit_file=os.path.join(mri_folder,'ob_seg_logits.h5')
+            hf = h5py.File(logit_file, 'w')
+            hf.create_dataset('Data', data=logits.astype(np.float32), compression='gzip')
+            hf.close()
+        return pred_img,crop_t2, logits ,orig_coord,cm_logits
+
