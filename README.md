@@ -104,7 +104,7 @@ The pipeline generates three type of output as presented in the following scheme
  
 **Image Biomarkers**
 
-For more information on the pipeline image biomarkers reported in the CSV files please check the document [variables.pdf](/to/do)
+For more information on the pipeline image biomarkers reported in the CSV files please check the document [ob_documentation.pdf](./ob_documentation.pdf)
 
 **Quality Control Image Example**
 
