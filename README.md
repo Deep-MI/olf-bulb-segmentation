@@ -58,6 +58,9 @@ This arguments is recommend it when whole brain T2w image is not available.
 # Run paper implementation 
 python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid subject
 
+# Run the pipeline without the localization network — this is recommended when whole-brain images are not available. Ensure that the images are centered on the OB region.
+python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid subject -nloc
+
 # Run the pipeline natively at a different resolution to the default one (0.8 Isotropic)
 python3 run_pipeline.py -in /input/t2/image -out /directory/to/save/output -sid subject -ninter
     

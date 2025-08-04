@@ -360,13 +360,34 @@ class OBNet(object):
 
         else:
             crop_t2_arr = t2_img.get_fdata()
-            crop_t2_arr = map_size(crop_t2_arr,base_shape=(self.flags['segmentation']['imgSize'][0],self.flags['segmentation']['imgSize'][1],self.flags['segmentation']['imgSize'][0]))
-            crop_t2 =  nib.Nifti1Image(crop_t2_arr,t2_img.affine,t2_img.header)
+            #middle point from crop image
+
             coord = np.array((crop_t2_arr.shape[0] // 2, crop_t2_arr.shape[1] // 2, crop_t2_arr.shape[2] // 2, 1))
+            crop_t2_arr = map_size(crop_t2_arr,base_shape=(self.flags['segmentation']['imgSize'][0],self.flags['segmentation']['imgSize'][1],self.flags['segmentation']['imgSize'][0]))
+            #crop_t2 =  nib.Nifti1Image(crop_t2_arr,t2_img.affine,t2_img.header)
             orig_coord = {}
-            orig_coord['ras'] = np.dot(crop_t2.affine, coord)
+            orig_coord['ras'] = np.dot(t2_img.affine, coord)
             orig_coord['xyz'] = coord[:]
-            orig_coord['zero_xyz'] = np.array((0,0,0,1))
+            orig_coord['xyz'] = orig_coord['xyz'].astype(np.int16)
+
+            zero_coordinate = np.array([orig_coord['xyz'][0] - crop_t2_arr.shape[0] //2, orig_coord['xyz'][1] - crop_t2_arr.shape[1] //2,
+                                        orig_coord['xyz'][2] - crop_t2_arr.shape[2] //2, 1])
+
+            orig_coord['zero_xyz']=zero_coordinate
+
+            self.logger.info(30 * '-')
+            self.logger.info('zero coordinate')
+            self.logger.info(zero_coordinate)
+            translationRAS = np.dot(t2_img.affine, zero_coordinate)
+
+            vox2RAS = t2_img.affine[:]
+
+            vox2RAS[0, 3] = translationRAS[0]
+            vox2RAS[1, 3] = translationRAS[1]
+            vox2RAS[2, 3] = translationRAS[2]
+
+            crop_t2 = nib.Nifti1Image(crop_t2_arr, vox2RAS, t2_img.header)
+
             cm_logits = None
 
 
